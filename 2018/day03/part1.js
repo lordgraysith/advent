@@ -12,7 +12,9 @@ async function run() {
     const claim = parseClaim(line)
     console.log(claim)
     claim.forEach(sq => {
+      console.log('sq\n', sq)
       fabric[sq[0]][sq[1]]++
+      console.log('fabric\n', fabric)
     })
   })
 
