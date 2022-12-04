@@ -5,20 +5,24 @@ async function run() {
         encoding: 'utf-8'
     })
     const list = file.split('\n')
-    const right = []
+    const right = {}, middle = []
     for (let index = 0; index < list.length; index++) {
         const leftNum = parseInt(list[index]);
-        const rightNum = 2020 - leftNum
-        if (right.includes(leftNum)) {
-            return {
-                num1: leftNum,
-                num2: rightNum,
-                result() {
-                    return this.num1 * this.num2
+        for (let i2 = 0; i2 < middle.length; i2++) {
+            const middleNum = middle[i2];
+            const rightNum = 2020 - (leftNum + middleNum)
+            if (Object.keys(right).includes(rightNum)) {
+                return {
+                    num1: leftNum,
+                    num2: rightNum,
+                    num3: middleNum,
+                    result() {
+                        return this.num1 * this.num2 * this.num3
+                    }
                 }
             }
+            right[rightNum] = {}
         }
-        right.push(rightNum)
     }
     throw Error('number not found')
 }
