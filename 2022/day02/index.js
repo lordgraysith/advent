@@ -9,9 +9,10 @@ async function run() {
     const rounds = file.split('\n')
     const totalScore = rounds.reduce((sum, round) => {
       if (!round) return sum
-      const [opponent, self] = round.split(' ')
-      const outcome = findOutcome(opponent, self)
-      const move = findMove(self)
+      const [opponentLetter, outcomeLetter] = round.split(' ')
+      const outcome = findOutcome(outcomeLetter)
+      const opponent = findMove(opponentLetter)
+      const move = findMoveForOutcome(opponent, outcome)
       return sum + outcomeScore(outcome) + moveScore(move)
     }, 0)
     return totalScore
@@ -20,28 +21,40 @@ async function run() {
 function findMove(letter) {
   switch (letter) {
     case 'A':
-    case 'X':
       return ROCK
     case 'B':
-    case 'Y':
       return PAPER
     case 'C':
-    case 'Z':
       return SCISSORS
     default:
       throw Error(`unsupported input: ${letter}`)
   }
 }
 
-function findOutcome(opponent, self) {
-  const oMove = findMove(opponent), sMove = findMove(self)
-  if (oMove === sMove) return DRAW
-  if (oMove === ROCK && sMove === PAPER ||
-      oMove === PAPER && sMove === SCISSORS ||
-      oMove === SCISSORS && sMove === ROCK) {
-    return WIN
+function findOutcome(letter) {
+  switch (letter) {
+    case 'X':
+      return LOSS
+    case 'Y':
+      return DRAW
+    case 'Z':
+      return WIN
+    default:
+      throw Error(`unsupported input: ${letter}`)
   }
-  return LOSS
+}
+
+function findMoveForOutcome(opponent, outcome) {
+  if (outcome === DRAW) return opponent
+  if (opponent === ROCK && outcome === WIN ||
+      opponent === SCISSORS && outcome === LOSS) {
+    return PAPER
+  }
+  if (opponent === PAPER && outcome === LOSS ||
+      opponent === SCISSORS && outcome === WIN) {
+    return ROCK
+  }
+  return SCISSORS
 }
 
 function outcomeScore(outcome) {
