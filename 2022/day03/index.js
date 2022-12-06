@@ -5,8 +5,27 @@ async function run() {
       encoding: 'utf-8'
   })
   const rucksacks=file.split('\n')
-  const result=rucksacks.reduce(calculateRucksack,0)
-  return result
+  const groups = rucksacks.reduce((previous, rucksack, currentIndex) => {
+    const lastGroup = previous[previous.length-1]
+    if(lastGroup.length < 3) {
+      lastGroup.push(rucksack)
+    } else {
+      previous.push([rucksack])
+    }
+    return previous
+  }, [[]])
+  const total = groups.reduce((sum, group) => {
+    let repeatedLetter
+    for (const letter of group[0]) {
+      if(group[1].indexOf(letter) >=0
+      && group[2].indexOf(letter) >=0) {
+        repeatedLetter = letter
+        break
+      }
+    }
+    return sum + convertLetterToNumber(repeatedLetter)
+  }, 0)
+  return total
 }
 function calculateRucksack(sum, rucksack) {
   const [firstComp, secondComp] = divideString(rucksack)
