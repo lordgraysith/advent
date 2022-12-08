@@ -10,7 +10,13 @@ async function run() {
     tree.readLine(line)
   })
 
-  return tree.getSumOfAllFolderSizesUnder(100000)
+  const folders = tree.tree.getFoldersAndSizes()
+
+  return folders.filter(folder => {
+    return folder.size > (30000000 - (70000000 - 46592386))
+  }).sort((a, b) => {
+    return b.size - a.size
+  })
 }
 
 function buildTree() {
@@ -37,8 +43,11 @@ function buildTree() {
     tree: {
       '/': {
         getFolderSize,
-        getSumOfFolderSizesUnder
-      }
+        getSumOfFolderSizesUnder,
+        path: ['/'],
+        getFoldersAndSizes
+      },
+      getFoldersAndSizes
     },
     currentLocation: ['/'],
     addFile: function(name, size) {
@@ -55,18 +64,35 @@ function buildTree() {
       })
       folder[name] = {
         getFolderSize,
-        getSumOfFolderSizesUnder
+        getSumOfFolderSizesUnder,
+        path: this.currentLocation.concat([name]),
+        getFoldersAndSizes
       }
     },
     getSumOfAllFolderSizesUnder
   }
 }
 
+function getFoldersAndSizes() {
+  let result = []
+  for (let key in this) {
+    const folder = this[key]
+    if (typeof folder === 'object' && !Array.isArray(folder)) { 
+      result.push({
+        path: folder.path.join('/'),
+        size: folder.getFolderSize()
+      })
+      result = result.concat(folder.getFoldersAndSizes())
+    }
+  }
+  return result
+}
+
 function getSumOfAllFolderSizesUnder(sizeLimit) {
   let sum = 0
   for (let key in this.tree) {
     const folder = this.tree[key]
-    if (typeof folder === 'object') {
+    if (typeof folder === 'object' && !Array.isArray(folder)) {
       const size = folder.getFolderSize()
       if (size <= sizeLimit) {
         sum += size
@@ -81,7 +107,7 @@ function getSumOfFolderSizesUnder(sizeLimit) {
   let sum = 0
   for (let key in this) {
     const folder = this[key]
-    if (typeof folder === 'object') {
+    if (typeof folder === 'object' && !Array.isArray(folder)) {
       const size = folder.getFolderSize()
       if (size <= sizeLimit) {
         sum += size
@@ -98,7 +124,7 @@ function getFolderSize(){
   keys.forEach(key => {
     if (typeof this[key] === 'number') {
       size += this[key]
-    } else if (typeof this[key] === 'object') {
+    } else if (typeof this[key] === 'object' && !Array.isArray(this[key])) {
       size += this[key].getFolderSize()
     }
   })
@@ -106,9 +132,9 @@ function getFolderSize(){
 }
 
 run().then(res => {
-    console.log({
+    console.log(JSON.stringify({
         result: res
-    })
+    }, null, 2))
 }).catch(ex => {
     console.error(ex)
     process.exit(1)
